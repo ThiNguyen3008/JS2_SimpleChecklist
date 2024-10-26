@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LocalStorage</title>
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+<body>
+
+  <div class="checklist">
+    <h2 style="font-size:2rem; font-family:fantasy">Checklist</h2>
+    <ul class="load">
+      <li>Loading...</li>
+    </ul>
+    <form class="add-items">
+      <input type="text" name="item" id = "item1" placeholder="Item Name" required>
+      <input type="submit" value="+ Add Item">
+    </form>
+  </div>
+
+<script>
+  // Select elements for adding items and displaying the list
+  const addItems = document.querySelector('.add-items'); // Form for adding items
+  const itemsList = document.querySelector('.load'); // List to display checklist items
+  const items = JSON.parse(localStorage.getItem('items')) || []; // Retrieve items from localStorage or initialize as empty array if none
+
+  // Function to add new item
+  function addItem(e) {
+    e.preventDefault(); // Prevent form from submitting to the server
+    const text = (this.querySelector('#item1')).value; // Get value from input field
+    const item = {
+      text,
+      done: false // Set default state to not done
+    };
+
+    items.push(item); // Add new item to items array
+    populateList(items, itemsList); // Update the displayed list with new items
+    localStorage.setItem('items', JSON.stringify(items)); // Save updated items array to localStorage
+    this.reset(); // Clear input field after adding item
+  }
+
+  // Function to display checklist items on the page
+  function populateList(load = [], loadList) {
+    loadList.innerHTML = load.map((load, i) => { // Loop through each item in array
+      return `
+        <li>
+          <input type="checkbox" data-index=${i} id="item${i}" ${load.done ? 'checked' : ''} /> <!-- Checkbox for each item -->
+          <label for="item${i}">${load.text}</label> <!-- Label for the item -->
+        </li>
+      `;
+    }).join(''); // Join array of list items into one HTML string
+  }
+
+  // Function to toggle item completion status
+  function toggleDone(e) {
+    if (!e.target.matches('input')) return; // Only respond if checkbox was clicked
+    const el = e.target; // Get the clicked checkbox element
+    const index = el.dataset.index; // Get index of clicked item from dataset
+    items[index].done = !items[index].done; // Toggle 'done' status
+    localStorage.setItem('items', JSON.stringify(items)); // Save updated items to localStorage
+    populateList(items, itemsList); // Re-render list with updated status
+  }
+
+  addItems.addEventListener('submit', addItem); // Listen for form submission to add item
+  itemsList.addEventListener('click', toggleDone); // Listen for clicks on list to toggle completion
+
+  populateList(items, itemsList); // Initial render of checklist items on page load
+
+
+</script>
+
+
+</body>
+</html>
+
